@@ -34,37 +34,42 @@ export class KimeraApiService {
   }
 
   private static async uploadImageToGetUrl(file: File): Promise<string> {
-    console.log('📤 Uploading image to get URL...', {
+    console.log('📤 Uploading image to Supabase storage...', {
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type
     });
     
-    // Create FormData for image upload
-    const formData = new FormData();
-    formData.append('file', file);
-    
     try {
-      // Upload image to get URL (using Kimera's upload endpoint)
-      const uploadResponse = await fetch('https://api.kimera.ai/v1/upload', {
-        method: 'POST',
-        headers: {
-          'x-api-key': this.apiKey,
-        },
-        body: formData
-      });
+      // Import supabase client
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (!uploadResponse.ok) {
-        throw new Error(`Upload failed with status ${uploadResponse.status}`);
+      if (error) {
+        console.error('❌ Supabase upload error:', error);
+        throw new Error(`Upload failed: ${error.message}`);
       }
 
-      const uploadData = await uploadResponse.json();
-      console.log('✅ Image uploaded successfully:', uploadData);
-      
-      // Return the URL from the upload response
-      return uploadData.url || uploadData.file_url || uploadData.image_url;
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(fileName);
+
+      console.log('✅ Image uploaded to Supabase:', publicUrl);
+      return publicUrl;
     } catch (error) {
-      console.error('❌ Error uploading image:', error);
+      console.error('❌ Error uploading image to Supabase:', error);
       throw error;
     }
   }
