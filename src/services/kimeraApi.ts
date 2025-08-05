@@ -20,7 +20,8 @@ export interface TransformationResponse {
 export interface CompletedTransformationResponse {
   id: string;
   status: string;
-  message: string;
+  message?: string;
+  result?: string;
   output?: {
     output_image: string;
   };
@@ -213,12 +214,12 @@ export class KimeraApiService {
           onStatusUpdate(result.status, attempts);
         }
 
-        if (result.status === 'Completed' && result.output?.output_image) {
+        if (result.status === 'completed' && result.result) {
           console.log('✅ Transformation completed successfully!');
-          return result.output.output_image;
+          return result.result;
         }
 
-        if (result.status === 'Failed' || result.status === 'Error') {
+        if (result.status === 'error' || result.status === 'failed' || result.status === 'Failed' || result.status === 'Error') {
           console.error('❌ Transformation failed with status:', result.status);
           throw new Error(`Transformation failed with status: ${result.status}`);
         }
