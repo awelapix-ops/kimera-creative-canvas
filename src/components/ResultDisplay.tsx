@@ -110,7 +110,7 @@ export function ResultDisplay({ status, resultImage, originalImage, onRetry }: R
                 <img
                   src={resultImage}
                   alt="Superhero Transformation"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             </div>
