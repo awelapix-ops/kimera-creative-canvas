@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Upload, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 
 interface ImageUploadProps {
   onImageSelect: (file: File) => void;
@@ -41,8 +43,34 @@ export function ImageUpload({ onImageSelect, selectedImage, onClearImage }: Imag
     fileInputRef.current?.click();
   };
 
-  const handleCameraClick = () => {
-    cameraInputRef.current?.click();
+  const handleCameraClick = async () => {
+    // Check if we're running on a native platform with Capacitor
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const image = await CapacitorCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera,
+        });
+
+        if (image.dataUrl) {
+          // Convert base64 to File
+          const response = await fetch(image.dataUrl);
+          const blob = await response.blob();
+          const file = new File([blob], `camera-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+          
+          onImageSelect(file);
+          toast.success('Photo captured successfully!');
+        }
+      } catch (error) {
+        console.error('Camera error:', error);
+        toast.error('Failed to capture photo. Please try again.');
+      }
+    } else {
+      // Fallback to HTML input for web browsers
+      cameraInputRef.current?.click();
+    }
   };
 
   const handleClear = () => {
