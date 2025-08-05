@@ -5,6 +5,7 @@ import { Upload, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
+import { CameraCapture } from './CameraCapture';
 
 interface ImageUploadProps {
   onImageSelect: (file: File) => void;
@@ -16,6 +17,7 @@ export function ImageUpload({ onImageSelect, selectedImage, onClearImage }: Imag
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
 
   React.useEffect(() => {
     if (selectedImage) {
@@ -68,9 +70,18 @@ export function ImageUpload({ onImageSelect, selectedImage, onClearImage }: Imag
         toast.error('Failed to capture photo. Please try again.');
       }
     } else {
-      // Fallback to HTML input for web browsers
-      cameraInputRef.current?.click();
+      // Show camera interface for web browsers
+      setShowCamera(true);
     }
+  };
+
+  const handleCameraCapture = (file: File) => {
+    onImageSelect(file);
+    setShowCamera(false);
+  };
+
+  const handleCameraClose = () => {
+    setShowCamera(false);
   };
 
   const handleClear = () => {
@@ -155,6 +166,13 @@ export function ImageUpload({ onImageSelect, selectedImage, onClearImage }: Imag
         onChange={handleFileSelect}
         className="hidden"
       />
+      
+      {showCamera && (
+        <CameraCapture 
+          onCapture={handleCameraCapture}
+          onClose={handleCameraClose}
+        />
+      )}
     </Card>
   );
 }
