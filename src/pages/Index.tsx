@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { ImageUpload } from '@/components/ImageUpload';
 import { TransformationPrompt } from '@/components/TransformationPrompt';
 import { ResultDisplay } from '@/components/ResultDisplay';
@@ -8,22 +7,12 @@ import { toast } from 'sonner';
 import { Sparkles, Zap, Bug } from 'lucide-react';
 
 const Index = () => {
-  const [apiKey, setApiKey] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isTransforming, setIsTransforming] = useState(false);
   const [transformationStatus, setTransformationStatus] = useState<'processing' | 'completed' | 'error' | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [debugMode, setDebugMode] = useState(false);
-
-  const handleApiKeySet = (key: string) => {
-    setApiKey(key);
-    if (key) {
-      KimeraApiService.setApiKey(key);
-    } else {
-      KimeraApiService.clearApiKey();
-    }
-  };
 
   const handleImageSelect = (file: File) => {
     console.log('🖼️ Image selected:', {
@@ -44,18 +33,12 @@ const Index = () => {
   };
 
   const handleTransform = async () => {
-    if (!apiKey) {
-      toast.error('Please enter your Kimera API key first');
-      return;
-    }
-
     if (!selectedImage || !prompt.trim()) {
       toast.error('Please select an image and enter a transformation prompt');
       return;
     }
 
     console.log('🎯 Starting transformation process...', {
-      hasApiKey: !!apiKey,
       fileName: selectedImage.name,
       prompt: prompt.trim(),
       debugMode
@@ -97,7 +80,6 @@ const Index = () => {
       
       if (debugMode) {
         console.table({
-          'API Key Set': !!apiKey,
           'Image Size': selectedImage?.size,
           'Prompt Length': prompt.length,
           'Error': errorMessage
@@ -155,11 +137,6 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Input */}
           <div className="space-y-6">
-            <ApiKeyInput
-              onApiKeySet={handleApiKeySet}
-              hasApiKey={!!apiKey}
-            />
-            
             <ImageUpload
               onImageSelect={handleImageSelect}
               selectedImage={selectedImage}
@@ -171,7 +148,7 @@ const Index = () => {
               onPromptChange={setPrompt}
               onTransform={handleTransform}
               isLoading={isTransforming}
-              disabled={!apiKey || !selectedImage || isTransforming}
+              disabled={!selectedImage || isTransforming}
             />
           </div>
 

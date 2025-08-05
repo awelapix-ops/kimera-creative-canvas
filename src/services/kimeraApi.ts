@@ -27,20 +27,10 @@ export interface CompletedTransformationResponse {
 }
 
 export class KimeraApiService {
-  private static apiKey: string | null = null;
+  private static readonly apiKey = '1b1c35dd33005efced81a13d0ccc768100c03a6c479895f28b0b4e7878321059';
 
-  static setApiKey(key: string) {
-    this.apiKey = key;
-    console.log('🔑 Kimera API key set');
-  }
-
-  static getApiKey(): string | null {
+  static getApiKey(): string {
     return this.apiKey;
-  }
-
-  static clearApiKey() {
-    this.apiKey = null;
-    console.log('🔑 Kimera API key cleared');
   }
 
   private static async uploadImageToCloudinary(file: File): Promise<string> {
@@ -73,9 +63,6 @@ export class KimeraApiService {
     imageFile: File,
     prompt: string
   ): Promise<TransformationResponse> {
-    if (!this.apiKey) {
-      throw new Error('API key not configured. Please set your Kimera API key first.');
-    }
 
     console.log('🚀 Starting transformation...', {
       fileName: imageFile.name,
@@ -148,9 +135,6 @@ export class KimeraApiService {
   static async checkTransformationStatus(
     processId: string
   ): Promise<CompletedTransformationResponse> {
-    if (!this.apiKey) {
-      throw new Error('API key not configured. Please set your Kimera API key first.');
-    }
 
     console.log('🔄 Checking transformation status for ID:', processId);
 
