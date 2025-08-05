@@ -214,9 +214,22 @@ export class KimeraApiService {
           onStatusUpdate(result.status, attempts);
         }
 
-        if (result.status === 'completed' && result.result) {
-          console.log('✅ Transformation completed successfully!');
-          return result.result;
+        if (result.status === 'completed') {
+          console.log('📊 Full API response object:', JSON.stringify(result, null, 2));
+          
+          // Check for result in the standard location
+          if (result.result) {
+            console.log('✅ Found result in result.result:', result.result);
+            return result.result;
+          }
+          
+          // Check for result in output field (alternative location)
+          if (result.output && result.output.output_image) {
+            console.log('✅ Found result in result.output.output_image:', result.output.output_image);
+            return result.output.output_image;
+          }
+          
+          console.warn('⚠️ Status is completed but no result found in expected locations');
         }
 
         if (result.status === 'error' || result.status === 'failed' || result.status === 'Failed' || result.status === 'Error') {
