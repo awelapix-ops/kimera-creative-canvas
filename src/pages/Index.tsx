@@ -1,19 +1,36 @@
 import React, { useState } from 'react';
+import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { ImageUpload } from '@/components/ImageUpload';
 import { TransformationPrompt } from '@/components/TransformationPrompt';
 import { ResultDisplay } from '@/components/ResultDisplay';
 import { KimeraApiService } from '@/services/kimeraApi';
 import { toast } from 'sonner';
-import { Sparkles, Zap } from 'lucide-react';
+import { Sparkles, Zap, Bug } from 'lucide-react';
 
 const Index = () => {
+  const [apiKey, setApiKey] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isTransforming, setIsTransforming] = useState(false);
   const [transformationStatus, setTransformationStatus] = useState<'processing' | 'completed' | 'error' | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
+
+  const handleApiKeySet = (key: string) => {
+    setApiKey(key);
+    if (key) {
+      KimeraApiService.setApiKey(key);
+    } else {
+      KimeraApiService.clearApiKey();
+    }
+  };
 
   const handleImageSelect = (file: File) => {
+    console.log('🖼️ Image selected:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
     setSelectedImage(file);
     // Reset previous results
     setTransformationStatus(null);
@@ -27,10 +44,22 @@ const Index = () => {
   };
 
   const handleTransform = async () => {
+    if (!apiKey) {
+      toast.error('Please enter your Kimera API key first');
+      return;
+    }
+
     if (!selectedImage || !prompt.trim()) {
       toast.error('Please select an image and enter a transformation prompt');
       return;
     }
+
+    console.log('🎯 Starting transformation process...', {
+      hasApiKey: !!apiKey,
+      fileName: selectedImage.name,
+      prompt: prompt.trim(),
+      debugMode
+    });
 
     setIsTransforming(true);
     setTransformationStatus('processing');
@@ -38,25 +67,42 @@ const Index = () => {
 
     try {
       // Start the transformation
+      console.log('📤 Calling startTransformation...');
       const response = await KimeraApiService.startTransformation(selectedImage, prompt);
       
+      console.log('✅ Transformation started, polling for completion...', response);
       toast.success('Transformation started! Processing your image...');
 
       // Poll for completion
       const finalImageUrl = await KimeraApiService.pollForCompletion(
         response.id,
-        (status) => {
-          console.log('Status update:', status);
+        (status, attempt) => {
+          console.log(`🔄 Status update (attempt ${attempt}):`, status);
+          if (attempt === 1) {
+            toast.loading(`Processing... Status: ${status}`, { duration: 2000 });
+          }
         }
       );
 
+      console.log('🎉 Transformation completed!', finalImageUrl);
       setResultImage(finalImageUrl);
       setTransformationStatus('completed');
       toast.success('Image transformation completed!');
     } catch (error) {
-      console.error('Transformation error:', error);
+      console.error('❌ Transformation error:', error);
       setTransformationStatus('error');
-      toast.error('Failed to transform image. Please try again.');
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to transform image: ${errorMessage}`);
+      
+      if (debugMode) {
+        console.table({
+          'API Key Set': !!apiKey,
+          'Image Size': selectedImage?.size,
+          'Prompt Length': prompt.length,
+          'Error': errorMessage
+        });
+      }
     } finally {
       setIsTransforming(false);
     }
@@ -89,6 +135,17 @@ const Index = () => {
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Upload any image and transform it into anything you can imagine with the power of artificial intelligence
             </p>
+            
+            {/* Debug Toggle */}
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setDebugMode(!debugMode)}
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Bug className="w-3 h-3" />
+                Debug Mode: {debugMode ? 'ON' : 'OFF'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -98,6 +155,11 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Input */}
           <div className="space-y-6">
+            <ApiKeyInput
+              onApiKeySet={handleApiKeySet}
+              hasApiKey={!!apiKey}
+            />
+            
             <ImageUpload
               onImageSelect={handleImageSelect}
               selectedImage={selectedImage}
@@ -109,7 +171,7 @@ const Index = () => {
               onPromptChange={setPrompt}
               onTransform={handleTransform}
               isLoading={isTransforming}
-              disabled={!selectedImage || isTransforming}
+              disabled={!apiKey || !selectedImage || isTransforming}
             />
           </div>
 
