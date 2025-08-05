@@ -172,10 +172,10 @@ const Index = () => {
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">
-            Powered by Advanced AI
+            Perfect for Marketing Campaigns
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Our cutting-edge AI technology can transform your images in ways you never imagined
+            Create engaging superhero content that boosts brand awareness and drives social media engagement
           </p>
         </div>
         
@@ -184,9 +184,9 @@ const Index = () => {
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto shadow-glow">
               <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground">Creative Freedom</h3>
+            <h3 className="text-xl font-semibold text-foreground">Social Media Ready</h3>
             <p className="text-muted-foreground">
-              Transform your photos into artwork, fantasy scenes, or any style you can describe
+              Generate viral-worthy superhero content perfect for Instagram, TikTok, and Facebook campaigns
             </p>
           </div>
           
@@ -194,9 +194,9 @@ const Index = () => {
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto shadow-glow">
               <Zap className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground">Lightning Fast</h3>
+            <h3 className="text-xl font-semibold text-foreground">Brand Engagement</h3>
             <p className="text-muted-foreground">
-              Get your transformed images in under a minute with our optimized AI pipeline
+              Increase customer engagement with fun, shareable superhero transformations of your audience
             </p>
           </div>
           
@@ -204,9 +204,9 @@ const Index = () => {
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto shadow-glow">
               <div className="w-8 h-8 border-2 border-current rounded border-primary-foreground"></div>
             </div>
-            <h3 className="text-xl font-semibold text-foreground">High Quality</h3>
+            <h3 className="text-xl font-semibold text-foreground">Campaign Boost</h3>
             <p className="text-muted-foreground">
-              Professional-grade AI ensures your transformed images look stunning and detailed
+              Drive higher conversion rates with unique, personalized superhero content for your marketing campaigns
             </p>
           </div>
         </div>
