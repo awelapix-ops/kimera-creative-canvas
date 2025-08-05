@@ -33,30 +33,40 @@ export class KimeraApiService {
     return this.apiKey;
   }
 
-  private static async uploadImageToCloudinary(file: File): Promise<string> {
-    console.log('📤 Converting image to base64...', {
+  private static async uploadImageToGetUrl(file: File): Promise<string> {
+    console.log('📤 Uploading image to get URL...', {
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type
     });
     
-    // Convert file to base64 for direct upload to Kimera API
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        console.log('✅ Image converted to base64', {
-          base64Length: base64.length,
-          preview: base64.substring(0, 100) + '...'
-        });
-        resolve(base64);
-      };
-      reader.onerror = (error) => {
-        console.error('❌ Error converting image to base64:', error);
-        reject(error);
-      };
-      reader.readAsDataURL(file);
-    });
+    // Create FormData for image upload
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      // Upload image to get URL (using Kimera's upload endpoint)
+      const uploadResponse = await fetch('https://api.kimera.ai/v1/upload', {
+        method: 'POST',
+        headers: {
+          'x-api-key': this.apiKey,
+        },
+        body: formData
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed with status ${uploadResponse.status}`);
+      }
+
+      const uploadData = await uploadResponse.json();
+      console.log('✅ Image uploaded successfully:', uploadData);
+      
+      // Return the URL from the upload response
+      return uploadData.url || uploadData.file_url || uploadData.image_url;
+    } catch (error) {
+      console.error('❌ Error uploading image:', error);
+      throw error;
+    }
   }
 
   static async startTransformation(
@@ -72,14 +82,14 @@ export class KimeraApiService {
     });
 
     try {
-      const imageData = await this.uploadImageToCloudinary(imageFile);
+      const imageUrl = await this.uploadImageToGetUrl(imageFile);
       
       const requestBody = {
         pipeline_id: "4avRtmmE",
         inputs: {
           model_hidden: "ChatGPT image",
           gen_text: prompt,
-          user_image: imageData
+          user_image: imageUrl
         }
       };
 
@@ -88,7 +98,7 @@ export class KimeraApiService {
         ...requestBody,
         inputs: {
           ...requestBody.inputs,
-          user_image: `[BASE64_IMAGE_${imageData.length}_CHARS]`
+          user_image: `[IMAGE_URL: ${imageUrl}]`
         }
       });
 
