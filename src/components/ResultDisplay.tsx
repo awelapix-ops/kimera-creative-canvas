@@ -104,28 +104,14 @@ export function ResultDisplay({ status, resultImage, originalImage, onRetry }: R
 
         {status === 'completed' && resultImage && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {originalImage && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Original</p>
-                  <div className="aspect-square bg-surface-elevated rounded-lg overflow-hidden">
-                    <img
-                      src={URL.createObjectURL(originalImage)}
-                      alt="Original"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              )}
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Transformed</p>
-                <div className="aspect-square bg-surface-elevated rounded-lg overflow-hidden shadow-glow">
-                  <img
-                    src={resultImage}
-                    alt="Transformed"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Your Superhero Transformation</p>
+              <div className="aspect-square bg-surface-elevated rounded-lg overflow-hidden shadow-glow">
+                <img
+                  src={resultImage}
+                  alt="Superhero Transformation"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
             
