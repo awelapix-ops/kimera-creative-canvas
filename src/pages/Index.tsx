@@ -8,7 +8,7 @@ import { Sparkles, Zap, Bug } from 'lucide-react';
 
 const Index = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [prompt, setPrompt] = useState('');
+  const prompt = "Transform this person into an epic superhero with amazing powers, wearing a stunning costume with vibrant colors and heroic pose";
   const [isTransforming, setIsTransforming] = useState(false);
   const [transformationStatus, setTransformationStatus] = useState<'processing' | 'completed' | 'error' | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
@@ -33,8 +33,8 @@ const Index = () => {
   };
 
   const handleTransform = async () => {
-    if (!selectedImage || !prompt.trim()) {
-      toast.error('Please select an image and enter a transformation prompt');
+    if (!selectedImage) {
+      toast.error('Please select an image');
       return;
     }
 
@@ -115,7 +115,7 @@ const Index = () => {
               <span className="bg-gradient-primary bg-clip-text text-transparent"> Transform</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Upload any image and transform it into anything you can imagine with the power of artificial intelligence
+              Upload your photo and watch as AI transforms you into an epic superhero with amazing powers!
             </p>
             
             {/* Debug Toggle */}
@@ -143,13 +143,24 @@ const Index = () => {
               onClearImage={handleClearImage}
             />
             
-            <TransformationPrompt
-              prompt={prompt}
-              onPromptChange={setPrompt}
-              onTransform={handleTransform}
-              isLoading={isTransforming}
-              disabled={!selectedImage || isTransforming}
-            />
+            <div className="text-center p-6 bg-surface border border-border/50 rounded-lg shadow-card">
+              <h3 className="text-lg font-semibold text-foreground mb-2">Ready to Transform!</h3>
+              <p className="text-muted-foreground mb-4">Upload your image and we'll transform you into an amazing superhero!</p>
+              <button
+                onClick={handleTransform}
+                disabled={!selectedImage || isTransforming}
+                className="px-6 py-3 bg-gradient-primary hover:shadow-glow transition-all duration-300 rounded-lg font-medium text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isTransforming ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2 inline-block" />
+                    Creating Superhero...
+                  </>
+                ) : (
+                  'Transform into Superhero'
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Right Column - Results */}
