@@ -4,7 +4,7 @@ import { TransformationPrompt } from '@/components/TransformationPrompt';
 import { ResultDisplay } from '@/components/ResultDisplay';
 import { KimeraApiService } from '@/services/kimeraApi';
 import { toast } from 'sonner';
-import { Sparkles, Zap, Bug } from 'lucide-react';
+import { Sparkles, Zap } from 'lucide-react';
 
 const Index = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -12,7 +12,7 @@ const Index = () => {
   const [isTransforming, setIsTransforming] = useState(false);
   const [transformationStatus, setTransformationStatus] = useState<'processing' | 'completed' | 'error' | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
-  const [debugMode, setDebugMode] = useState(false);
+  
 
   const handleImageSelect = (file: File) => {
     console.log('🖼️ Image selected:', {
@@ -40,8 +40,7 @@ const Index = () => {
 
     console.log('🎯 Starting transformation process...', {
       fileName: selectedImage.name,
-      prompt: prompt.trim(),
-      debugMode
+      prompt: prompt.trim()
     });
 
     setIsTransforming(true);
@@ -89,14 +88,6 @@ const Index = () => {
       
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast.error(`Failed to transform image: ${errorMessage}`);
-      
-      if (debugMode) {
-        console.table({
-          'Image Size': selectedImage?.size,
-          'Prompt Length': prompt.length,
-          'Error': errorMessage
-        });
-      }
     } finally {
       setIsTransforming(false);
     }
@@ -130,16 +121,6 @@ const Index = () => {
               Upload your photo and watch as AI transforms you into an epic superhero with amazing powers!
             </p>
             
-            {/* Debug Toggle */}
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => setDebugMode(!debugMode)}
-                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Bug className="w-3 h-3" />
-                Debug Mode: {debugMode ? 'ON' : 'OFF'}
-              </button>
-            </div>
           </div>
         </div>
       </div>
