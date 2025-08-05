@@ -48,6 +48,8 @@ const Index = () => {
     setTransformationStatus('processing');
     setResultImage(null);
 
+    let loadingToastId: string | number | undefined;
+
     try {
       // Start the transformation
       console.log('📤 Calling startTransformation...');
@@ -56,22 +58,32 @@ const Index = () => {
       console.log('✅ Transformation started, polling for completion...', response);
       toast.success('Transformation started! Processing your image...');
 
-      // Poll for completion
+      // Poll for completion with a loading toast
       const finalImageUrl = await KimeraApiService.pollForCompletion(
         response.id,
         (status, attempt) => {
           console.log(`🔄 Status update (attempt ${attempt}):`, status);
           if (attempt === 1) {
-            toast.loading(`Processing... Status: ${status}`, { duration: 2000 });
+            loadingToastId = toast.loading(`Processing... Status: ${status}`);
           }
         }
       );
+
+      // Dismiss the loading toast
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
 
       console.log('🎉 Transformation completed!', finalImageUrl);
       setResultImage(finalImageUrl);
       setTransformationStatus('completed');
       toast.success('Image transformation completed!');
     } catch (error) {
+      // Dismiss the loading toast if it exists
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
+      
       console.error('❌ Transformation error:', error);
       setTransformationStatus('error');
       
