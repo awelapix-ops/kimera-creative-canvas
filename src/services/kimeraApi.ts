@@ -108,6 +108,19 @@ export class KimeraApiService {
         }
       });
 
+      // Validate image URL is accessible
+      try {
+        const imageCheck = await fetch(imageUrl, { method: 'HEAD' });
+        if (!imageCheck.ok) {
+          console.error('❌ Image URL not accessible:', imageUrl, imageCheck.status);
+          throw new Error(`Uploaded image is not accessible (status: ${imageCheck.status})`);
+        }
+        console.log('✅ Image URL is accessible:', imageUrl);
+      } catch (imageError) {
+        console.error('❌ Error checking image accessibility:', imageError);
+        throw new Error('Uploaded image is not accessible for processing');
+      }
+
       const response = await fetch(`${KIMERA_API_BASE}/pipeline/run`, {
         method: 'POST',
         headers: {
@@ -134,6 +147,8 @@ export class KimeraApiService {
           throw new Error('Access forbidden. Your API key may not have sufficient permissions.');
         } else if (response.status === 429) {
           throw new Error('Rate limit exceeded. Please try again later.');
+        } else if (response.status === 400) {
+          throw new Error(`Bad request: ${errorText}. Please check your image format and prompt.`);
         } else {
           throw new Error(`API request failed with status ${response.status}: ${errorText}`);
         }
@@ -207,7 +222,8 @@ export class KimeraApiService {
         console.log(`📊 Status update (attempt ${attempts}):`, {
           status: result.status,
           hasOutput: !!result.output,
-          outputImage: result.output?.output_image ? 'Present' : 'Missing'
+          outputImage: result.output?.output_image ? 'Present' : 'Missing',
+          fullResponse: result
         });
 
         if (onStatusUpdate) {
@@ -232,9 +248,27 @@ export class KimeraApiService {
           console.warn('⚠️ Status is completed but no result found in expected locations');
         }
 
+        // Check for error status - but don't immediately fail, give it a few more attempts
         if (result.status === 'error' || result.status === 'failed' || result.status === 'Failed' || result.status === 'Error') {
           console.error('❌ Transformation failed with status:', result.status);
-          throw new Error(`Transformation failed with status: ${result.status}`);
+          console.error('📊 Full error response:', JSON.stringify(result, null, 2));
+          
+          // If we've tried multiple times and it's still erroring, give up
+          if (attempts >= 5) {
+            let errorMessage = `Transformation failed with status: ${result.status}`;
+            
+            // Try to extract more specific error information
+            if (result.message) {
+              errorMessage += ` - ${result.message}`;
+            }
+            if (result.error) {
+              errorMessage += ` - ${result.error}`;
+            }
+            
+            throw new Error(errorMessage);
+          } else {
+            console.log('⚠️ Error detected but will retry a few more times...');
+          }
         }
 
         // Wait 5 seconds before next check
