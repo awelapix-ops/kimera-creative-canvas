@@ -8,7 +8,7 @@ import { Sparkles, Zap } from 'lucide-react';
 
 const Index = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const prompt = "Transform this person into an epic superhero with amazing powers, wearing a stunning costume with vibrant colors and heroic pose, person is standing full length";
+  const prompt = "Transform this person into an epic superhero with extraordinary powers, wearing a stunning costume in vibrant colors. Show the person in a full-length flying pose, their entire body visible from head to toe. Place them soaring through a dramatic sunset golden hour sky, with glowing clouds, warm cinematic light, and a sense of motion that highlights their heroic presence.";
   const [isTransforming, setIsTransforming] = useState(false);
   const [transformationStatus, setTransformationStatus] = useState<'processing' | 'completed' | 'error' | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
